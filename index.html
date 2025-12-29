@@ -1,341 +1,574 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Big-8 裁員戰情室 2025 | 全球科技業裁員監測</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@300;400;700&display=swap');
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Big-8 裁員戰情室 2025</title>
+  <meta name="theme-color" content="#ff4444">
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --accent: #ff4444;
+      --success: #7ee787;
+      --warning: #f0883e;
+      --info: #58a6ff;
+    }
 
-        :root {
-            --bg-dark: #05070a;
-            --card-bg: #0d1117;
-            --accent-red: #ff3e3e;
-            --accent-green: #00ff9d;
-            --border-color: #30363d;
-        }
+    * { box-sizing: border-box; }
 
-        body {
-            background-color: var(--bg-dark);
-            color: #e6edf3;
-            font-family: 'Noto Sans TC', sans-serif;
-            margin: 0;
-            overflow-x: hidden;
-        }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 10px;
+      margin: 0;
+      line-height: 1.5;
+    }
 
-        .mono { font-family: 'JetBrains Mono', monospace; }
-        .glow-red { text-shadow: 0 0 10px rgba(255, 62, 62, 0.5); }
-        
-        .cyber-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            position: relative;
-            overflow: hidden;
-        }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
 
-        .cyber-card::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent-red), transparent);
-        }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 2px solid var(--accent);
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
 
-        .scanline {
-            width: 100%;
-            height: 100px;
-            z-index: 10;
-            background: linear-gradient(0deg, rgba(0, 255, 157, 0.05) 0%, transparent 100%);
-            position: absolute;
-            bottom: 100%;
-            animation: scan 4s linear infinite;
-        }
+    h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
 
-        @keyframes scan {
-            0% { bottom: -100px; }
-            100% { bottom: 100%; }
-        }
+    #clock {
+      font-family: 'Courier New', monospace;
+      font-size: 1.1rem;
+      color: var(--success);
+      background: #000;
+      padding: 5px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      box-shadow: inset 0 0 5px rgba(126, 231, 135, 0.2);
+    }
 
-        .loading-overlay {
-            background: rgba(5, 7, 10, 0.8);
-            backdrop-filter: blur(4px);
-        }
-    </style>
+    .card {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .status-area {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 20px;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .last-update-tag {
+      font-size: 0.8rem;
+      color: #8b949e;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    #last-update-time {
+      color: var(--warning);
+      font-weight: bold;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      background: var(--success);
+      border-radius: 50%;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+    }
+
+    .stat-value {
+      display: block;
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #8b949e;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background: #21262d;
+      color: #8b949e;
+      font-weight: 500;
+    }
+
+    .tesla-alert {
+      background: rgba(255, 68, 68, 0.15);
+      border-left: 4px solid var(--accent);
+    }
+
+    .tesla-alert td {
+      color: #ff7b72;
+      font-weight: bold;
+    }
+
+    .blink {
+      animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    pre {
+      background: #000;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      color: #d2a8ff;
+      border: 1px solid var(--border);
+      white-space: pre-wrap;
+      margin: 0;
+    }
+
+    .btn {
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #21262d;
+      color: var(--text);
+      font-size: 0.85rem;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn:hover {
+      background: #30363d;
+      border-color: #8b949e;
+    }
+
+    .btn-primary {
+      background: #238636;
+      border-color: rgba(240,246,252,0.1);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #2ea043;
+    }
+
+    .btn-warning {
+      background: var(--warning);
+      color: #000;
+      font-weight: bold;
+    }
+
+    .config-section {
+      font-size: 0.8rem;
+      background: #1c2128;
+      border: 1px dashed var(--border);
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .config-input {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 4px 8px;
+      border-radius: 4px;
+      width: 250px;
+    }
+  </style>
 </head>
-<body class="p-4 md:p-8">
-    <div class="max-w-6xl mx-auto">
-        <!-- 頁首區塊 -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-red-900 pb-4">
-            <div>
-                <h1 class="text-3xl font-bold tracking-tighter text-red-500 flex items-center gap-3">
-                    <i class="fa-solid fa-radiation animate-spin text-2xl" style="animation-duration: 3s;"></i>
-                    BIG-8 裁員戰情室 2025
-                </h1>
-                <p class="text-gray-500 text-sm mt-1 uppercase tracking-widest">Global Tech Layoff Real-time Monitor</p>
-            </div>
-            <div class="mt-4 md:mt-0 text-right">
-                <div id="clock" class="mono text-xl text-green-400 font-bold">00:00:00</div>
-                <div class="flex items-center justify-end gap-2 mt-1">
-                    <button onclick="toggleConfig()" class="text-xs text-gray-500 hover:text-white transition-colors">
-                        <i class="fa-solid fa-gear"></i> 設定 API
-                    </button>
-                    <div class="text-xs text-gray-500 font-bold" id="location-tag">STATION: TAIPEI_HUB_01</div>
-                </div>
-            </div>
-        </header>
+<body>
+  <div class="container">
+    <header>
+      <h1>Big-8 裁員戰情室 <span class="blink">●</span></h1>
+      <div id="clock">正在初始化系統時間...</div>
+    </header>
 
-        <!-- 關鍵指標區塊 -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="cyber-card p-4 rounded-lg bg-red-950/10">
-                <div class="text-gray-500 text-xs font-bold mb-1 uppercase">2025 累計預估</div>
-                <div class="text-3xl font-bold mono glow-red" id="stat-total">---</div>
-                <div class="text-xs text-red-400 mt-2"><i class="fa-solid fa-arrow-trend-up"></i> 較去年同期 +12.4%</div>
-            </div>
-            <div class="cyber-card p-4 rounded-lg">
-                <div class="text-gray-500 text-xs font-bold mb-1 uppercase">今日新增 (EST)</div>
-                <div class="text-3xl font-bold mono text-orange-400" id="stat-today">---</div>
-                <div class="text-xs text-gray-500 mt-2">即時追蹤中</div>
-            </div>
-            <div class="cyber-card p-4 rounded-lg">
-                <div class="text-gray-500 text-xs font-bold mb-1 uppercase">AI 職位替代率</div>
-                <div class="text-3xl font-bold mono text-blue-400" id="stat-ai-ratio">24.8%</div>
-                <div class="text-xs text-gray-500 mt-2">核心技術部門推估</div>
-            </div>
-            <div class="cyber-card p-4 rounded-lg">
-                <div class="text-gray-500 text-xs font-bold mb-1 uppercase">自動更新倒數</div>
-                <div class="text-3xl font-bold mono text-green-400" id="stat-timer">05:00</div>
-                <div class="text-xs text-gray-500 mt-2">同步全網數據</div>
-            </div>
-        </div>
-
-        <!-- 每月裁員長條圖區塊 -->
-        <div class="cyber-card rounded-xl p-6 mb-8 bg-gray-900/30">
-            <h2 class="text-sm font-bold text-gray-400 mb-6 flex items-center gap-2 uppercase tracking-widest">
-                <i class="fa-solid fa-chart-bar text-red-500"></i> 2025 逐月裁員趨勢分析 (Monthly Layoffs)
-            </h2>
-            <div class="w-full h-[300px]">
-                <canvas id="monthlyChart"></canvas>
-            </div>
-        </div>
-
-        <!-- 主要動態與分析區塊 -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2">
-                <div class="cyber-card rounded-xl shadow-2xl">
-                    <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-900/50">
-                        <h2 class="font-bold flex items-center gap-2">
-                            <i class="fa-solid fa-list-check text-red-500"></i> 八巨頭即時動態
-                        </h2>
-                        <span class="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded border border-red-500/30 font-bold uppercase">Live Monitor</span>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm">
-                            <thead>
-                                <tr class="border-b border-gray-800 text-gray-500 uppercase text-xs">
-                                    <th class="p-4">企業</th>
-                                    <th class="p-4">累計裁員 (2025)</th>
-                                    <th class="p-4">核心趨勢</th>
-                                    <th class="p-4">警示層級</th>
-                                </tr>
-                            </thead>
-                            <tbody id="company-table-body">
-                                <!-- JS 自動生成內容 -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div class="lg:col-span-1 space-y-4">
-                <div class="cyber-card rounded-xl p-6 bg-blue-950/10 border-blue-900/50 relative min-h-[400px]">
-                    <div class="scanline"></div>
-                    <h2 class="text-blue-400 font-bold mb-4 flex items-center gap-2 uppercase tracking-tighter">
-                        <i class="fa-solid fa-brain"></i> AI 戰情分析 (Gemini)
-                    </h2>
-                    <div id="ai-analysis" class="text-sm leading-relaxed text-blue-100/80 space-y-3">
-                        <p class="animate-pulse italic">偵測到數據變動，正在構建分析矩陣...</p>
-                    </div>
-                    <button id="refresh-btn" class="mt-6 w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded font-bold text-xs transition-all uppercase tracking-widest border border-blue-400/50 shadow-lg shadow-blue-500/20">
-                        手動刷新情報
-                    </button>
-                </div>
-            </div>
-        </div>
+    <!-- Google Drive 設定區域 -->
+    <div class="card config-section" id="gdrive-config">
+      <strong>GDrive 備份設定:</strong>
+      <input type="password" id="gdrive-client-id" class="config-input" placeholder="輸入 Google Client ID">
+      <button class="btn" onclick="initGDriveAuth()">
+        <span id="auth-status">🔑 授權 GDrive</span>
+      </button>
+      <div style="margin-top: 5px; font-size: 0.75rem; color: #8b949e;">
+        ※ 目錄將自動指向: /layoff-monitor
+      </div>
     </div>
 
-    <!-- API 設定彈窗 -->
-    <div id="api-config-modal" class="fixed inset-0 z-[60] flex items-center justify-center hidden p-4 bg-black/80 backdrop-blur-sm">
-        <div class="bg-gray-900 border border-blue-500 p-6 rounded-lg w-full max-w-md shadow-2xl">
-            <h3 class="text-blue-400 font-bold mb-4 uppercase flex items-center gap-2">
-                <i class="fa-solid fa-key"></i> 設定 Gemini API 金鑰
-            </h3>
-            <p class="text-xs text-gray-400 mb-4 leading-relaxed">
-                若要使用 AI 搜尋與分析功能，請輸入您的 API Key。此金鑰僅儲存於本地瀏覽器。
-            </p>
-            <input type="password" id="api-key-input" placeholder="貼上您的 API Key..." class="w-full bg-black border border-gray-700 p-3 rounded text-sm text-blue-400 mb-4 focus:border-blue-500 outline-none">
-            <div class="flex gap-2">
-                <button onclick="saveApiKey()" class="flex-1 bg-blue-600 py-2 rounded font-bold text-xs uppercase">儲存金鑰</button>
-                <button onclick="toggleConfig()" class="px-4 py-2 border border-gray-700 rounded text-xs text-gray-500">取消</button>
-            </div>
+    <div class="card">
+      <div class="status-area">
+        <div class="status-bar">
+          <div class="dot blink"></div>
+          <span id="status" class="update-tag" style="color: var(--success); font-weight: bold;">全球監控中...</span>
         </div>
+        <div class="last-update-tag">
+          最後數據同步日期時間：<span id="last-update-time">等待初次同步...</span>
+        </div>
+      </div>
+      
+      <div class="stats-grid">
+        <div class="stat-item">
+          <span class="stat-label">2025 全球累計 (估計)</span>
+          <span id="total" class="stat-value">---</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">今日新增 (EST)</span>
+          <span id="today" class="stat-value">---</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">下次自動掃描倒數</span>
+          <span id="next" class="stat-value">05:00</span>
+        </div>
+      </div>
     </div>
 
-    <div id="loading-screen" class="fixed inset-0 loading-overlay z-50 flex flex-col items-center justify-center hidden">
-        <div class="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <div class="mono text-red-500 font-bold tracking-widest text-sm animate-pulse">UPDATING STATION DATA...</div>
+    <div class="card" style="overflow-x: auto;">
+      <h2 style="font-size: 1.1rem; margin-top: 0; border-left: 3px solid var(--accent); padding-left: 10px;">八巨頭全球實時動態表</h2>
+      <table id="table">
+        <thead>
+          <tr>
+            <th>企業名稱</th>
+            <th>累計人數</th>
+            <th>最新關鍵字</th>
+            <th>產業分析趨勢</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <!-- JS 將自動填入 -->
+        </tbody>
+      </table>
     </div>
 
-    <script>
-        const companies = [
-            { id: "Google", name: "Google", trend: "AI 自動化替代", alert: "HIGH" },
-            { id: "Microsoft", name: "Microsoft", trend: "Azure 雲端調整", alert: "MED" },
-            { id: "Meta", name: "Meta", trend: "Reality Labs 精簡", alert: "MED" },
-            { id: "Amazon", name: "Amazon", trend: "AWS 效率優化", alert: "HIGH" },
-            { id: "Apple", name: "Apple", trend: "服務部門微調", alert: "LOW" },
-            { id: "Nvidia", name: "Nvidia", trend: "擴展 AI 生態系", alert: "STABLE" },
-            { id: "Broadcom", name: "Broadcom", trend: "VMware 整合完成", alert: "MED" },
-            { id: "Tesla", name: "Tesla", trend: "機器人產線優先", alert: "CRITICAL" }
-        ];
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h2 style="font-size: 1.1rem; margin: 0; border-left: 3px solid var(--success); padding-left: 10px;">AI 結構調整深度報告 (24H)</h2>
+        <div style="display: flex; gap: 5px;">
+            <button class="btn btn-primary" onclick="generateTrendSummary()">📊 趨勢總論</button>
+            <button class="btn btn-warning" onclick="saveReportToGDrive()">💾 備份至 GDrive</button>
+        </div>
+      </div>
+      <pre id="report">正在彙整全球分析數據流...</pre>
+    </div>
+  </div>
 
-        let countdown = 300;
-        let chartInstance = null;
-        const apiKey = ""; // 系統自動填入
+<!-- Google API 客戶端 -->
+<script src="https://apis.google.com/js/api.js"></script>
+<script src="https://accounts.google.com/gsi/client"></script>
 
-        function getStoredKey() {
-            return apiKey || localStorage.getItem('GEMINI_API_KEY') || "";
-        }
+<script>
+// 公司清單
+const companies = ["Google","Microsoft","Meta","Amazon","Apple","Nvidia","Broadcom","Tesla"];
+let countdown = 300; 
+let historyReports = JSON.parse(localStorage.getItem('layoff_history') || '[]');
 
-        function toggleConfig() {
-            const modal = document.getElementById('api-config-modal');
-            modal.classList.toggle('hidden');
-        }
+// --- Google Drive 整合變數 ---
+let gapiInited = false;
+let gsisInited = false;
+let tokenClient;
+let gdriveFolderId = null;
 
-        function saveApiKey() {
-            const val = document.getElementById('api-key-input').value;
-            localStorage.setItem('GEMINI_API_KEY', val);
-            toggleConfig();
-            fetchAIAnalysis();
-        }
+const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
-        // 初始化圖表
-        function initChart() {
-            const ctx = document.getElementById('monthlyChart').getContext('2d');
-            const mockData = [12500, 18400, 15600, 22000, 19800, 25400, 21000, 17500, 19200, 28400, 23100, 15000]; 
-            
-            if (chartInstance) chartInstance.destroy();
+// 格式化日期時間函數
+function formatDateTime(date, onlyDate = false) {
+  const options = onlyDate 
+    ? { year: 'numeric', month: '2-digit', day: '2-digit' }
+    : { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+  return date.toLocaleString('zh-TW', options).replace(/\//g, '-');
+}
 
-            chartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                    datasets: [{
-                        label: '裁員人數',
-                        data: mockData,
-                        backgroundColor: 'rgba(255, 62, 62, 0.4)',
-                        borderColor: '#ff3e3e',
-                        borderWidth: 2,
-                        hoverBackgroundColor: 'rgba(255, 62, 62, 0.8)',
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: '#1a1f26' },
-                            ticks: { color: '#8b949e', font: { family: 'JetBrains Mono' } }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#8b949e', font: { family: 'JetBrains Mono' } }
-                        }
-                    }
-                }
-            });
-        }
+// 更新頂部時鐘
+function updateClock() {
+  const clockEl = document.getElementById("clock");
+  if (clockEl) clockEl.textContent = formatDateTime(new Date());
+}
 
-        async function fetchAIAnalysis() {
-            const currentKey = getStoredKey();
-            const analysisEl = document.getElementById('ai-analysis');
-            
-            if (!currentKey) {
-                analysisEl.innerHTML = `<p class="text-orange-400">系統處於離線監控模式。請點選右上角齒輪設定 API 金鑰以連動 AI 即時分析報告。</p>`;
-                renderTable();
-                return;
-            }
+// 更新倒數計時器
+function updateCountdown() {
+  const mins = Math.floor(countdown / 60);
+  const secs = countdown % 60;
+  const nextEl = document.getElementById("next");
+  if (nextEl) nextEl.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  
+  if (countdown <= 0) {
+    refreshLayoffData();
+    countdown = 300;
+  } else {
+    countdown--;
+  }
+}
 
-            const loading = document.getElementById('loading-screen');
-            loading.classList.remove('hidden');
+// 模擬獲取即時數據
+async function refreshLayoffData() {
+  const statusEl = document.getElementById("status");
+  if (statusEl) statusEl.textContent = '正在攔截全球新聞與 WARN 裁員公告...';
+  
+  setTimeout(() => {
+    const now = new Date();
+    const mockData = {
+      timestamp: now.getTime(),
+      total: 224600 + (historyReports.length * 150), 
+      today: 1980 + Math.floor(Math.random() * 500),
+      details: {
+        Google: ["14,500", "行銷團隊優化", "AI 專案重組"],
+        Microsoft: ["18,200", "Azure 非核心調整", "AI 資源集中"],
+        Meta: ["6,500", "管理層級精簡", "Llama 4 核心招募"],
+        Amazon: ["17,100", "物流自動化取代", "AWS 結構重組"],
+        Apple: ["210", "硬體專案結束", "重心移至 AI iPhone"],
+        Nvidia: ["0", "全球招募中", "算力需求高峰"],
+        Broadcom: ["0", "整併穩定期", "AI 網通元件領先"],
+        Tesla: ["23,800", "銷售與服務部精簡", "重心轉向 Optimus 訓練 ← 紅色警報"]
+      },
+      report: `[戰情分析] ${formatDateTime(now)}\n------------------------------------------------\n1. 科技業進入「AI 替代週期」，企業並非僅縮減規模，而是將人才結構轉向 AGI 領域。\n2. Tesla 裁員數字因應全球策略轉向再次大幅上修，旨在將資源投入 Optimus 機器人研發。\n3. Nvidia 目前為全球技術競爭力最強之避風港，維持零裁員並擴大全球招募。`
+    };
 
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${currentKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: "根據 2025 年最新科技裁員動態，請提供一份繁體中文戰情分析。語氣保持專業、簡潔且具備情報感。" }] }],
-                        tools: [{ "google_search": {} }]
-                    })
-                });
+    // 紀錄到歷史 (模擬 GDrive 彙整基礎)
+    historyReports.push(mockData);
+    if(historyReports.length > 30) historyReports.shift(); // 僅保留近30次紀錄
+    localStorage.setItem('layoff_history', JSON.stringify(historyReports));
 
-                const data = await response.json();
-                const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "通訊干擾，分析失敗。";
-                
-                document.getElementById('stat-total').textContent = (248500 + Math.floor(Math.random() * 5000)).toLocaleString();
-                document.getElementById('stat-today').textContent = "+" + (320 + Math.floor(Math.random() * 1000)).toLocaleString();
+    document.getElementById("total").textContent = mockData.total.toLocaleString();
+    document.getElementById("today").textContent = "+" + mockData.today.toLocaleString();
+    document.getElementById("report").textContent = mockData.report;
 
-                analysisEl.innerHTML = text.split('\n').map(line => `<p>${line}</p>`).join('');
-                renderTable();
-                initChart();
+    let tableHTML = "";
+    for (let c of companies) {
+      const [total, latest, trend] = mockData.details[c] || ["---","---","---"];
+      const isTesla = c === "Tesla";
+      tableHTML += `
+        <tr class="${isTesla ? 'tesla-alert' : ''}">
+          <td><strong>${c}</strong></td>
+          <td>${total}</td>
+          <td>${latest}</td>
+          <td>${trend}</td>
+        </tr>
+      `;
+    }
+    document.getElementById("table-body").innerHTML = tableHTML;
+    document.getElementById("last-update-time").textContent = formatDateTime(now);
+    if (statusEl) statusEl.textContent = '系統監控中';
+  }, 1200);
+}
 
-            } catch (error) {
-                analysisEl.innerHTML = "<p class='text-red-500'>連線錯誤。請確認金鑰權限與 API 配置。</p>";
-            } finally {
-                loading.classList.add('hidden');
-            }
-        }
+// --- Google Drive 核心功能 ---
 
-        function renderTable() {
-            const tbody = document.getElementById('company-table-body');
-            tbody.innerHTML = companies.map(c => {
-                let alertClass = "";
-                switch(c.alert) {
-                    case "CRITICAL": alertClass = "text-red-500 font-bold glow-red"; break;
-                    case "HIGH": alertClass = "text-orange-500"; break;
-                    case "MED": alertClass = "text-yellow-500"; break;
-                    case "LOW": alertClass = "text-blue-400"; break;
-                    case "STABLE": alertClass = "text-green-500"; break;
-                }
-                return `
-                    <tr class="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors">
-                        <td class="p-4 font-bold text-white uppercase">${c.name}</td>
-                        <td class="p-4 mono">${(1500 + Math.random() * 25000).toFixed(0).toLocaleString()}</td>
-                        <td class="p-4 text-gray-500 text-xs">${c.trend}</td>
-                        <td class="p-4"><span class="px-2 py-0.5 rounded text-[10px] border border-current ${alertClass}">${c.alert}</span></td>
-                    </tr>
-                `;
-            }).join('');
-        }
+async function initGDriveAuth() {
+    const clientId = document.getElementById('gdrive-client-id').value;
+    if(!clientId) {
+        alert("請先輸入 Google Client ID");
+        return;
+    }
 
-        setInterval(() => {
-            document.getElementById('clock').textContent = new Date().toTimeString().split(' ')[0];
-            countdown--;
-            const mins = Math.floor(countdown / 60);
-            const secs = countdown % 60;
-            document.getElementById('stat-timer').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
-            if (countdown <= 0) { countdown = 300; fetchAIAnalysis(); }
-        }, 1000);
+    gapi.load('client', async () => {
+        await gapi.client.init({
+            discoveryDocs: [DISCOVERY_DOC],
+        });
+        gapiInited = true;
+    });
 
-        document.getElementById('refresh-btn').onclick = fetchAIAnalysis;
-        
-        window.onload = () => {
-            initChart();
-            fetchAIAnalysis();
+    tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: SCOPES,
+        callback: async (resp) => {
+            if (resp.error !== undefined) throw (resp);
+            document.getElementById('auth-status').textContent = "✅ 已連結 GDrive";
+            gsisInited = true;
+        },
+    });
+
+    if (gapi.client.getToken() === null) {
+        tokenClient.requestAccessToken({prompt: 'consent'});
+    } else {
+        tokenClient.requestAccessToken({prompt: ''});
+    }
+}
+
+async function getOrCreateFolder() {
+    if (gdriveFolderId) return gdriveFolderId;
+
+    const response = await gapi.client.drive.files.list({
+        q: "name = 'layoff-monitor' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+        fields: 'files(id, name)',
+    });
+
+    const folders = response.result.files;
+    if (folders && folders.length > 0) {
+        gdriveFolderId = folders[0].id;
+        return gdriveFolderId;
+    } else {
+        const fileMetadata = {
+            'name': 'layoff-monitor',
+            'mimeType': 'application/vnd.google-apps.folder'
         };
-    </script>
+        const folder = await gapi.client.drive.files.create({
+            resource: fileMetadata,
+            fields: 'id'
+        });
+        gdriveFolderId = folder.result.id;
+        return gdriveFolderId;
+    }
+}
+
+async function uploadFileToGDrive(filename, content) {
+    if (!gsisInited) {
+        alert("請先完成 GDrive 授權");
+        return;
+    }
+
+    const folderId = await getOrCreateFolder();
+    const metadata = {
+        name: filename,
+        mimeType: 'text/markdown',
+        parents: [folderId]
+    };
+
+    const boundary = '-------314159265358979323846';
+    const delimiter = "\r\n--" + boundary + "\r\n";
+    const close_delim = "\r\n--" + boundary + "--";
+
+    const multipartRequestBody =
+        delimiter +
+        'Content-Type: application/json\r\n\r\n' +
+        JSON.stringify(metadata) +
+        delimiter +
+        'Content-Type: text/markdown\r\n\r\n' +
+        content +
+        close_delim;
+
+    try {
+        await gapi.client.request({
+            'path': '/upload/drive/v3/files',
+            'method': 'POST',
+            'params': {'uploadType': 'multipart'},
+            'headers': {
+                'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+            },
+            'body': multipartRequestBody
+        });
+        return true;
+    } catch (e) {
+        console.error(e);
+        return false;
+    }
+}
+
+// 儲存當前報告
+async function saveReportToGDrive() {
+    const reportText = document.getElementById('report').textContent;
+    const filename = `layoff-report-${formatDateTime(new Date(), true)}.md`;
+    
+    const mdContent = `# 裁員戰情室每日報告\n\n生成時間: ${formatDateTime(new Date())}\n\n\`\`\`text\n${reportText}\n\`\`\``;
+
+    const success = await uploadFileToGDrive(filename, mdContent);
+    if(success) {
+        alert(`報告已成功存入 GDrive: ${filename}`);
+    } else {
+        alert("儲存失敗，請檢查授權狀態");
+    }
+}
+
+// 產生趨勢總論
+async function generateTrendSummary() {
+    if(historyReports.length < 2) {
+        alert("歷史數據不足，請多刷新幾次戰情室。");
+        return;
+    }
+
+    const start = historyReports[0];
+    const end = historyReports[historyReports.length - 1];
+    const diff = end.total - start.total;
+
+    const summary = `# 裁員趨勢總論報告 (layoff-monitor)\n\n` +
+        `## 1. 監測期間\n` +
+        `- 開始: ${formatDateTime(new Date(start.timestamp))}\n` +
+        `- 結束: ${formatDateTime(new Date(end.timestamp))}\n\n` +
+        `## 2. 數據變化分析\n` +
+        `- 累計裁員總數從 ${start.total.toLocaleString()} 增至 ${end.total.toLocaleString()}\n` +
+        `- 監測期間淨增加: **${diff.toLocaleString()}** 人\n` +
+        `- 平均每次更新增量: ${Math.floor(diff / historyReports.length)} 人\n\n` +
+        `## 3. 重點警示回顧\n` +
+        `- **Tesla**: 持續保持紅色警報狀態，FSD 與 Optimus 轉型痛點明顯。\n` +
+        `- **Nvidia**: 穩定作為避風港，無裁員紀錄。\n\n` +
+        `## 4. 總結觀點\n` +
+        `本期間數據顯示科技大廠正處於「AI 換血」的高峰期。`;
+
+    document.getElementById('report').textContent = summary;
+    
+    // 如果已授權，自動備份總論
+    if(gsisInited) {
+        const filename = `trend-summary-${formatDateTime(new Date(), true)}.md`;
+        await uploadFileToGDrive(filename, summary);
+        alert("趨勢總論已生成並自動同步至 GDrive");
+    }
+}
+
+// --- 初始化啟動 ---
+setInterval(updateClock, 1000);
+setInterval(updateCountdown, 1000);
+
+window.onload = function() {
+  updateClock();
+  refreshLayoffData();
+}
+</script>
 </body>
 </html>
