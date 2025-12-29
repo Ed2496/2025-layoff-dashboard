@@ -191,6 +191,7 @@
       transition: 0.2s;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 5px;
     }
 
@@ -215,6 +216,11 @@
       font-weight: bold;
     }
 
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     .config-section {
       font-size: 0.8rem;
       background: #1c2128;
@@ -232,6 +238,30 @@
       border-radius: 4px;
       width: 250px;
     }
+
+    .debug-info {
+      margin-top: 10px;
+      padding: 8px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 4px;
+      border-left: 3px solid var(--info);
+      font-family: monospace;
+      font-size: 0.75rem;
+    }
+
+    .msg-box {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        background: #161b22;
+        border: 1px solid var(--border);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        z-index: 1000;
+        display: none;
+    }
   </style>
 </head>
 <body>
@@ -244,12 +274,20 @@
     <!-- Google Drive 設定區域 -->
     <div class="card config-section" id="gdrive-config">
       <strong>GDrive 備份設定:</strong>
-      <input type="password" id="gdrive-client-id" class="config-input" placeholder="輸入 Google Client ID">
-      <button class="btn" onclick="initGDriveAuth()">
-        <span id="auth-status">🔑 授權 GDrive</span>
-      </button>
-      <div style="margin-top: 5px; font-size: 0.75rem; color: #8b949e;">
-        ※ 目錄將自動指向: /layoff-monitor
+      <div style="margin-top:10px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+          <input type="password" id="gdrive-client-id" class="config-input" placeholder="輸入 Google Client ID">
+          <button class="btn" id="auth-btn" onclick="initGDriveAuth()">
+            <span id="auth-status">🔑 授權 GDrive</span>
+          </button>
+      </div>
+      
+      <div id="origin-debug" class="debug-info">
+          偵測目前 Origin (請複製到 Google Console):<br>
+          <span id="current-origin" style="color: var(--info);">讀取中...</span>
+      </div>
+
+      <div style="margin-top: 10px; font-size: 0.75rem; color: #8b949e;">
+        ※ 步驟：在 Google Cloud Console 的 OAuth 用戶端設定中，將上方網址加入「已授權的 JavaScript 來源」。
       </div>
     </div>
 
@@ -302,12 +340,14 @@
         <h2 style="font-size: 1.1rem; margin: 0; border-left: 3px solid var(--success); padding-left: 10px;">AI 結構調整深度報告 (24H)</h2>
         <div style="display: flex; gap: 5px;">
             <button class="btn btn-primary" onclick="generateTrendSummary()">📊 趨勢總論</button>
-            <button class="btn btn-warning" onclick="saveReportToGDrive()">💾 備份至 GDrive</button>
+            <button class="btn btn-warning" id="save-btn" onclick="saveReportToGDrive()">💾 備份至 GDrive</button>
         </div>
       </div>
       <pre id="report">正在彙整全球分析數據流...</pre>
     </div>
   </div>
+
+<div id="msg-box" class="msg-box"></div>
 
 <!-- Google API 客戶端 -->
 <script src="https://apis.google.com/js/api.js"></script>
@@ -327,6 +367,13 @@ let gdriveFolderId = null;
 
 const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
 const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+
+function showMessage(msg, duration = 3000) {
+    const box = document.getElementById('msg-box');
+    box.textContent = msg;
+    box.style.display = 'block';
+    setTimeout(() => { box.style.display = 'none'; }, duration);
+}
 
 // 格式化日期時間函數
 function formatDateTime(date, onlyDate = false) {
@@ -381,9 +428,9 @@ async function refreshLayoffData() {
       report: `[戰情分析] ${formatDateTime(now)}\n------------------------------------------------\n1. 科技業進入「AI 替代週期」，企業並非僅縮減規模，而是將人才結構轉向 AGI 領域。\n2. Tesla 裁員數字因應全球策略轉向再次大幅上修，旨在將資源投入 Optimus 機器人研發。\n3. Nvidia 目前為全球技術競爭力最強之避風港，維持零裁員並擴大全球招募。`
     };
 
-    // 紀錄到歷史 (模擬 GDrive 彙整基礎)
+    // 紀錄到歷史
     historyReports.push(mockData);
-    if(historyReports.length > 30) historyReports.shift(); // 僅保留近30次紀錄
+    if(historyReports.length > 30) historyReports.shift();
     localStorage.setItem('layoff_history', JSON.stringify(historyReports));
 
     document.getElementById("total").textContent = mockData.total.toLocaleString();
@@ -414,42 +461,54 @@ async function refreshLayoffData() {
 async function initGDriveAuth() {
     const clientId = document.getElementById('gdrive-client-id').value;
     if(!clientId) {
-        alert("請先輸入 Google Client ID");
+        showMessage("請先輸入 Google Client ID");
         return;
     }
 
-    gapi.load('client', async () => {
-        await gapi.client.init({
-            discoveryDocs: [DISCOVERY_DOC],
+    const authBtn = document.getElementById('auth-btn');
+    authBtn.disabled = true;
+
+    try {
+        if (!gapiInited) {
+            await new Promise((resolve, reject) => {
+                gapi.load('client', { callback: resolve, onerror: reject });
+            });
+            await gapi.client.init({ discoveryDocs: [DISCOVERY_DOC] });
+            gapiInited = true;
+        }
+
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: clientId,
+            scope: SCOPES,
+            callback: async (resp) => {
+                if (resp.error !== undefined) {
+                    showMessage("授權出錯: " + resp.error);
+                    authBtn.disabled = false;
+                    throw (resp);
+                }
+                document.getElementById('auth-status').textContent = "✅ 已連結 GDrive";
+                gsisInited = true;
+                authBtn.disabled = false;
+                showMessage("GDrive 授權成功！");
+            },
         });
-        gapiInited = true;
-    });
 
-    tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: clientId,
-        scope: SCOPES,
-        callback: async (resp) => {
-            if (resp.error !== undefined) throw (resp);
-            document.getElementById('auth-status').textContent = "✅ 已連結 GDrive";
-            gsisInited = true;
-        },
-    });
-
-    if (gapi.client.getToken() === null) {
+        // 觸發授權
         tokenClient.requestAccessToken({prompt: 'consent'});
-    } else {
-        tokenClient.requestAccessToken({prompt: ''});
+
+    } catch (e) {
+        console.error(e);
+        showMessage("初始化失敗，請檢查網路或 Client ID");
+        authBtn.disabled = false;
     }
 }
 
 async function getOrCreateFolder() {
     if (gdriveFolderId) return gdriveFolderId;
-
     const response = await gapi.client.drive.files.list({
         q: "name = 'layoff-monitor' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
         fields: 'files(id, name)',
     });
-
     const folders = response.result.files;
     if (folders && folders.length > 0) {
         gdriveFolderId = folders[0].id;
@@ -470,31 +529,28 @@ async function getOrCreateFolder() {
 
 async function uploadFileToGDrive(filename, content) {
     if (!gsisInited) {
-        alert("請先完成 GDrive 授權");
+        showMessage("請先完成 GDrive 授權");
         return;
     }
-
-    const folderId = await getOrCreateFolder();
-    const metadata = {
-        name: filename,
-        mimeType: 'text/markdown',
-        parents: [folderId]
-    };
-
-    const boundary = '-------314159265358979323846';
-    const delimiter = "\r\n--" + boundary + "\r\n";
-    const close_delim = "\r\n--" + boundary + "--";
-
-    const multipartRequestBody =
-        delimiter +
-        'Content-Type: application/json\r\n\r\n' +
-        JSON.stringify(metadata) +
-        delimiter +
-        'Content-Type: text/markdown\r\n\r\n' +
-        content +
-        close_delim;
-
     try {
+        const folderId = await getOrCreateFolder();
+        const metadata = {
+            name: filename,
+            mimeType: 'text/markdown',
+            parents: [folderId]
+        };
+        const boundary = '-------314159265358979323846';
+        const delimiter = "\r\n--" + boundary + "\r\n";
+        const close_delim = "\r\n--" + boundary + "--";
+        const multipartRequestBody =
+            delimiter +
+            'Content-Type: application/json\r\n\r\n' +
+            JSON.stringify(metadata) +
+            delimiter +
+            'Content-Type: text/markdown\r\n\r\n' +
+            content +
+            close_delim;
+
         await gapi.client.request({
             'path': '/upload/drive/v3/files',
             'method': 'POST',
@@ -511,53 +567,51 @@ async function uploadFileToGDrive(filename, content) {
     }
 }
 
-// 儲存當前報告
 async function saveReportToGDrive() {
     const reportText = document.getElementById('report').textContent;
+    const saveBtn = document.getElementById('save-btn');
+    saveBtn.disabled = true;
     const filename = `layoff-report-${formatDateTime(new Date(), true)}.md`;
-    
     const mdContent = `# 裁員戰情室每日報告\n\n生成時間: ${formatDateTime(new Date())}\n\n\`\`\`text\n${reportText}\n\`\`\``;
-
     const success = await uploadFileToGDrive(filename, mdContent);
-    if(success) {
-        alert(`報告已成功存入 GDrive: ${filename}`);
-    } else {
-        alert("儲存失敗，請檢查授權狀態");
-    }
+    if(success) showMessage(`報告已存入 GDrive: ${filename}`);
+    else showMessage("備份失敗，請確認授權或網域設定");
+    saveBtn.disabled = false;
 }
 
-// 產生趨勢總論
 async function generateTrendSummary() {
     if(historyReports.length < 2) {
-        alert("歷史數據不足，請多刷新幾次戰情室。");
+        showMessage("歷史數據不足，請等待更新數據。");
         return;
     }
-
     const start = historyReports[0];
     const end = historyReports[historyReports.length - 1];
     const diff = end.total - start.total;
-
     const summary = `# 裁員趨勢總論報告 (layoff-monitor)\n\n` +
         `## 1. 監測期間\n` +
         `- 開始: ${formatDateTime(new Date(start.timestamp))}\n` +
         `- 結束: ${formatDateTime(new Date(end.timestamp))}\n\n` +
         `## 2. 數據變化分析\n` +
         `- 累計裁員總數從 ${start.total.toLocaleString()} 增至 ${end.total.toLocaleString()}\n` +
-        `- 監測期間淨增加: **${diff.toLocaleString()}** 人\n` +
-        `- 平均每次更新增量: ${Math.floor(diff / historyReports.length)} 人\n\n` +
-        `## 3. 重點警示回顧\n` +
-        `- **Tesla**: 持續保持紅色警報狀態，FSD 與 Optimus 轉型痛點明顯。\n` +
-        `- **Nvidia**: 穩定作為避風港，無裁員紀錄。\n\n` +
+        `- 監測期間淨增加: **${diff.toLocaleString()}** 人\n\n` +
         `## 4. 總結觀點\n` +
         `本期間數據顯示科技大廠正處於「AI 換血」的高峰期。`;
-
     document.getElementById('report').textContent = summary;
-    
-    // 如果已授權，自動備份總論
     if(gsisInited) {
         const filename = `trend-summary-${formatDateTime(new Date(), true)}.md`;
         await uploadFileToGDrive(filename, summary);
-        alert("趨勢總論已生成並自動同步至 GDrive");
+        showMessage("趨勢總論已同步至 GDrive");
+    }
+}
+
+// --- 輔助：偵測當前 Origin ---
+function detectOrigin() {
+    const origin = window.location.origin;
+    const display = document.getElementById('current-origin');
+    if (origin.startsWith('blob:')) {
+        display.textContent = "偵測到 Blob 沙盒環境。請將佈署後的網址（如 GitHub 網址）加入 Google Console。";
+    } else {
+        display.textContent = origin;
     }
 }
 
@@ -568,6 +622,7 @@ setInterval(updateCountdown, 1000);
 window.onload = function() {
   updateClock();
   refreshLayoffData();
+  detectOrigin();
 }
 </script>
 </body>
