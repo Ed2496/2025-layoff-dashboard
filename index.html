@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Big-8 裁員戰情室 2025 | 深度情報監控版</title>
-    <!-- 引入外部庫 -->
+    <!-- 核心外部庫 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -121,9 +121,9 @@
             font-size: 13px;
         }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-dark); }
-        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -135,15 +135,15 @@
                     <i class="fa-solid fa-radiation animate-spin text-2xl" style="animation-duration: 4s;"></i>
                     BIG-8 裁員戰情室 2025
                 </h1>
-                <p class="text-gray-500 text-sm mt-1 uppercase tracking-widest mono">Resource Allocation & AI Displacement Monitoring</p>
+                <p class="text-gray-500 text-sm mt-1 uppercase tracking-widest mono text-xs">Resource Allocation & AI Deployment Monitoring // Intelligence Hub</p>
             </div>
             <div class="mt-4 md:mt-0 text-right">
                 <div id="clock" class="mono text-2xl text-green-400 font-bold glow-green">00:00:00</div>
-                <div class="text-[10px] text-gray-500 font-bold tracking-tighter uppercase" id="origin-tag">STATION: DETECTING...</div>
+                <div class="text-[10px] text-gray-500 font-bold tracking-tighter uppercase" id="origin-tag">STATION: INITIALIZING...</div>
             </div>
         </header>
 
-        <!-- 認證設定中心 -->
+        <!-- 認證設定中心 (Static HTML 確保顯示) -->
         <div class="cyber-card p-6 rounded-xl mb-8 border-blue-900/40 bg-blue-950/5">
             <h3 class="text-xs font-bold text-blue-400 mb-4 flex items-center gap-2 uppercase tracking-widest">
                 <i class="fa-solid fa-gears"></i> 戰情室認證中心 (SETTINGS)
@@ -166,9 +166,9 @@
                     </button>
                 </div>
             </div>
-            <div class="mt-4 flex justify-between items-center text-[9px] mono text-gray-600">
-                <div>PROVISIONED_ORIGIN: <span id="current-origin" class="text-blue-500 italic">...</span></div>
-                <div class="text-blue-400/60 font-bold">SECURITY_LEVEL: ALPHA_CLEARANCE</div>
+            <div class="mt-4 flex flex-col md:flex-row justify-between md:items-center text-[9px] mono text-gray-600 gap-2">
+                <div>PROVISIONED_ORIGIN: <span id="current-origin" class="text-blue-500 italic underline">DETECTING...</span></div>
+                <div class="text-blue-400/60 font-bold italic uppercase">Security Level: Alpha_Clearance</div>
             </div>
         </div>
 
@@ -192,7 +192,7 @@
             <div class="cyber-card p-4 rounded-lg">
                 <div class="text-gray-500 text-[10px] font-bold mb-1 uppercase tracking-wider">自動掃描週期</div>
                 <div class="text-3xl font-bold mono text-green-400" id="stat-timer">05:00</div>
-                <div class="text-[10px] text-gray-600 mt-2 italic">衛星連線狀態: NORMAL</div>
+                <div class="text-[10px] text-gray-600 mt-2 italic uppercase">Satellite Feed: Active</div>
             </div>
         </div>
 
@@ -215,6 +215,7 @@
                         <h2 class="text-sm font-bold flex items-center gap-2 uppercase">
                             <i class="fa-solid fa-satellite"></i> BIG-8 行動監控清單
                         </h2>
+                        <span class="text-[10px] text-red-500/80 animate-pulse mono">ENCRYPTED DATA FEED</span>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm">
@@ -236,7 +237,7 @@
 
             <!-- Right: AI Gemini Analysis & Controls -->
             <div class="lg:col-span-4 space-y-6">
-                <div class="cyber-card rounded-xl p-6 bg-blue-950/20 border-blue-900/50 relative min-h-[500px] flex flex-col">
+                <div class="cyber-card rounded-xl p-6 bg-blue-950/20 border-blue-900/50 relative min-h-[550px] flex flex-col">
                     <div class="scanline"></div>
                     <h2 class="text-blue-400 font-bold mb-4 flex items-center gap-2 uppercase tracking-tighter text-sm">
                         <i class="fa-solid fa-brain"></i> AI 戰情分析核心
@@ -244,8 +245,11 @@
                     
                     <!-- 報告視窗 -->
                     <div id="ai-analysis" class="text-sm leading-relaxed text-blue-100/90 space-y-4 flex-grow overflow-y-auto pr-2 custom-scroll">
-                        <div class="text-gray-500 italic p-4 text-center border border-dashed border-gray-800 rounded mt-10">
-                            等待認證啟動中...<br>請填寫 API Key 以同步最新情報
+                        <!-- 初始加載顯示預設情報 -->
+                        <div class="text-gray-400 space-y-2">
+                            <p class="font-bold text-blue-300">【系統初始化】</p>
+                            <p>偵測到 2025 年科技業裁員潮呈現「戰略性結構調整」。目前全球累計人數已突破 122,000 人。</p>
+                            <p>Intel 以 15% (約 2.7萬人) 規模居首位。請填寫 API Key 以同步最新衛星深度分析。</p>
                         </div>
                     </div>
 
@@ -267,14 +271,14 @@
                 </div>
 
                 <div class="cyber-card rounded-xl p-5 bg-gray-900/50">
-                    <h3 class="text-[10px] font-bold text-gray-500 mb-4 uppercase tracking-widest">系統指標監控</h3>
+                    <h3 class="text-[10px] font-bold text-gray-500 mb-4 uppercase tracking-widest">系統指標監控 (STATUS)</h3>
                     <div class="space-y-3">
                         <div class="flex justify-between items-center">
-                            <span class="text-xs text-gray-400">數據來源可靠性:</span>
+                            <span class="text-xs text-gray-400">數據可靠性:</span>
                             <span class="text-green-400 mono">98.2%</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-xs text-gray-400">通訊加密強度:</span>
+                            <span class="text-xs text-gray-400">通訊加密:</span>
                             <span class="text-blue-400 mono">AES-256</span>
                         </div>
                     </div>
@@ -283,28 +287,28 @@
         </div>
 
         <footer class="mt-12 text-center border-t border-gray-900 pt-8 pb-12">
-            <p class="text-[10px] text-gray-600 tracking-widest uppercase">© 2025 Tech Layoff Intelligence Command Center // GROUNDED BY GEMINI 2.5 FLASH</p>
+            <p class="text-[10px] text-gray-600 tracking-widest uppercase">© 2025 Tech Layoff Intelligence Command Center // POWERED BY GEMINI-FLASH 2.5</p>
         </footer>
     </div>
 
-    <div id="msg-box" class="msg-box"></div>
+    <div id="msg-box" class="msg-box mono"></div>
 
     <div id="loading-screen" class="fixed inset-0 loading-overlay z-50 flex flex-col items-center justify-center hidden">
         <div class="w-12 h-12 border-2 border-red-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <div class="mono text-red-500 font-bold tracking-widest text-[10px] animate-pulse">DECRYPTING QUANTUM DATA STREAM...</div>
+        <div class="mono text-red-500 font-bold tracking-widest text-[10px] animate-pulse uppercase">Syncing Quantum Feed...</div>
     </div>
 
     <script>
-        // --- 核心數據與配置 ---
+        // --- 核心數據配置 ---
         const companiesData = [
-            { id: "Intel", name: "Intel Corp", scale: "27,000", trend: "嚴格財務紀律 / 聚焦 AI 晶片代工", alert: "CRITICAL" },
-            { id: "Microsoft", name: "Microsoft", scale: "15,000", trend: "結構性優化 / 加速 Copilot 整合", alert: "HIGH" },
-            { id: "Amazon", name: "Amazon AWS", scale: "14,000", trend: "精簡中階管理 / 專注核心雲端業務", alert: "HIGH" },
-            { id: "Google", name: "Google", scale: "1,200", trend: "Gemini 生態系資源重新調配", alert: "MED" },
-            { id: "Salesforce", name: "Salesforce", scale: "5,000", trend: "提昇毛利與組織執行效率", alert: "MED" },
-            { id: "TCS", name: "TCS", scale: "20,000", trend: "印度 IT 服務向自動化轉型", alert: "HIGH" },
-            { id: "Nvidia", name: "Nvidia", scale: "0", trend: "Blackwell 量產擴張 / 持續招募", alert: "STABLE" },
-            { id: "Tesla", name: "Tesla", scale: "15,500", trend: "FSD 團隊優化 / Optimus 生產優先", alert: "CRITICAL" }
+            { id: "Intel", name: "Intel Corp", scale: "27,000", trend: "嚴格財務紀律 / 聚焦 AI 製造", alert: "CRITICAL" },
+            { id: "Microsoft", name: "Microsoft", scale: "15,000", trend: "組織結構精簡 / Copilot 資源傾斜", alert: "HIGH" },
+            { id: "TCS", name: "TCS (India)", scale: "20,000", trend: "IT 服務模式向自動化大規模轉型", alert: "HIGH" },
+            { id: "Amazon", name: "Amazon AWS", scale: "14,000", trend: "精簡中階管理 / 雲端業務重組", alert: "HIGH" },
+            { id: "Salesforce", name: "Salesforce", scale: "5,000", trend: "提昇毛利與人力成本優化", alert: "MED" },
+            { id: "Google", name: "Google", scale: "1,200", trend: "Gemini 生態系研發人力迭代", alert: "MED" },
+            { id: "Tesla", name: "Tesla", scale: "15,500", trend: "自動化產線重構 / Optimus 優先", alert: "CRITICAL" },
+            { id: "Nvidia", name: "Nvidia", scale: "0", trend: "Blackwell 量產擴張 / 持續招募", alert: "STABLE" }
         ];
 
         let countdown = 300;
@@ -319,10 +323,10 @@
         let gdriveFolderId = null;
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
-        // --- UI 控制項 ---
+        // --- UI 工具 ---
         function showMessage(msg, duration = 3500) {
             const box = document.getElementById('msg-box');
-            box.textContent = msg;
+            box.textContent = `> ${msg}`;
             box.style.display = 'block';
             setTimeout(() => { box.style.display = 'none'; }, duration);
         }
@@ -355,18 +359,18 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        y: { grid: { color: '#1a1f26' }, ticks: { color: '#555', font: { size: 9 } } },
-                        x: { grid: { display: false }, ticks: { color: '#888', font: { size: 9 } } }
+                        y: { grid: { color: '#1a1f26' }, ticks: { color: '#555', font: { size: 9, family: 'JetBrains Mono' } } },
+                        x: { grid: { display: false }, ticks: { color: '#888', font: { size: 9, family: 'JetBrains Mono' } } }
                     }
                 }
             });
         }
 
-        // --- Gemini AI 戰情分析 ---
+        // --- Gemini AI 分析 ---
         async function fetchAIAnalysis() {
-            const apiKey = document.getElementById('gdrive-api-key').value;
+            const apiKey = document.getElementById('gdrive-api-key').value.trim();
             if(!apiKey) {
-                showMessage("請先在設定區輸入 Gemini API Key");
+                // 如果沒有金鑰，保持預設內容，不發出請求
                 return;
             }
 
@@ -375,13 +379,13 @@
             loading.classList.remove('hidden');
 
             const query = `
-                你是一位資深科技情報分析官。請針對 2025 年全球科技業裁員情報進行分析：
+                你是一位資深科技情報分析官。請針對 2025 年全球科技業裁員情報進行專業分析：
                 情報背景：
-                1. 年度總額約 12.2 萬人，涉及約 551 家公司。
-                2. Intel 裁撤 15% 人力為最大宗，Microsoft 與 Amazon AWS 隨其後。
-                3. 動機：由「修正招聘」轉向「AI 驅動的效率提升」。
-                4. 指標案例：Canva 用生成式 AI 取代技術寫手。
-                請產出一份繁體中文報告，包含：【總體判讀】、【關鍵變動】、【風險提示】。口吻需冷靜且具備軍事戰略感。
+                1. 年度總額約 12.2 萬人，涉及約 551 家公司。較去年下降 20%，進入「戰略穩定期」。
+                2. Intel 裁撤 15% (2.7萬人) 為最大宗，Microsoft 與 Amazon AWS 居次。
+                3. 動機：AI 浪潮導致的「人才重構」，淘汰傳統冗餘，招募 AI 優先人才。
+                4. 關鍵詞：財務紀律、效率極大化、資源傾斜 (Gemini, Copilot, Optimus)。
+                請產出一份繁體中文報告，包含：【總體判判】、【關鍵參與者】、【未來展望】。口吻需冷靜、帶點科幻軍事風格。
             `;
 
             try {
@@ -394,7 +398,7 @@
                 const data = await response.json();
                 if (data.error) throw new Error(data.error.message);
                 
-                const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "通訊同步失敗。";
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "NO DATA RETURNED.";
                 lastLiveReport = text;
                 
                 if (currentView === "live") {
@@ -406,25 +410,29 @@
 
             } catch (error) {
                 console.error(error);
-                analysisEl.innerHTML = `<p class='text-red-500 mono'>[ACCESS_DENIED] ${error.message}</p>`;
-                if(error.message.includes("403")) showMessage("API Key 權限不足或無效 (403)");
+                if (error.message.includes("403") || error.message.includes("API key")) {
+                    analysisEl.innerHTML = `<p class='text-orange-500 mono'>[ACCESS_DENIED] 無效的 API KEY (403)。請檢查設定區。</p>`;
+                } else {
+                    analysisEl.innerHTML = `<p class='text-red-500 mono'>[ERROR] 通訊連線中斷: ${error.message}</p>`;
+                }
             } finally {
                 loading.classList.add('hidden');
             }
         }
 
-        // --- 認證與儲存邏輯 ---
+        // --- 認證儲存 ---
         function saveKeysAndAuth() {
-            const cid = document.getElementById('gdrive-client-id').value;
-            const aky = document.getElementById('gdrive-api-key').value;
-            if(!cid || !aky) return showMessage("請輸入 Client ID 與 API Key");
+            const cid = document.getElementById('gdrive-client-id').value.trim();
+            const aky = document.getElementById('gdrive-api-key').value.trim();
+            
+            if(!cid || !aky) return showMessage("認證失敗: Client ID 與 API Key 不得為空");
 
             localStorage.setItem('gdrive_client_id', cid);
             localStorage.setItem('gdrive_api_key', aky);
             
-            showMessage("認證資料已更新，正在執行授權...");
+            showMessage("認證資料儲存成功，嘗試連結衛星...");
             initGDriveAuth();
-            fetchAIAnalysis(); // 自動觸發分析更新
+            fetchAIAnalysis(); 
         }
 
         function clearKeys() {
@@ -432,12 +440,12 @@
             localStorage.removeItem('gdrive_api_key');
             document.getElementById('gdrive-client-id').value = "";
             document.getElementById('gdrive-api-key').value = "";
-            showMessage("認證紀錄已清除");
+            showMessage("所有認證紀錄已清除");
         }
 
         async function initGDriveAuth() {
-            const cid = document.getElementById('gdrive-client-id').value;
-            const aky = document.getElementById('gdrive-api-key').value;
+            const cid = document.getElementById('gdrive-client-id').value.trim();
+            const aky = document.getElementById('gdrive-api-key').value.trim();
             if(!cid) return;
 
             try {
@@ -449,32 +457,35 @@
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: cid, scope: SCOPES,
                     callback: (resp) => {
-                        if (resp.error) return showMessage("GDrive 授權失敗");
+                        if (resp.error) {
+                            console.error(resp);
+                            return showMessage("GDrive 授權遭拒");
+                        }
                         gsisInited = true;
                         document.getElementById('auth-status').textContent = "已連線";
                         document.getElementById('auth-btn').classList.replace('btn-blue', 'btn-green');
-                        showMessage("Google Drive 授權成功");
+                        showMessage("雲端硬碟連結成功");
                     }
                 });
                 tokenClient.requestAccessToken({prompt: 'consent'});
             } catch (e) { 
                 console.error(e);
-                showMessage("授權初始化失敗");
+                showMessage("授權組件初始化失敗");
             }
         }
 
-        // --- GDrive 存檔邏輯 ---
+        // --- GDrive 存檔 ---
         async function saveReportToGDrive() {
-            if(!gsisInited) return showMessage("請先點擊「執行授權」以連結 GDrive");
+            if(!gsisInited) return showMessage("備份失敗: 請先執行 GDrive 授權");
             const content = document.getElementById('ai-analysis').innerText;
             const filename = `layoff-intel-${new Date().toISOString().split('T')[0]}.md`;
             
-            showMessage("雲端同步中...");
+            showMessage("正在加密並同步至雲端...");
             try {
                 const fid = await getOrCreateFolder();
                 await uploadFile(filename, content, fid);
-                showMessage("情報已同步至 GDrive: /layoff-monitor");
-            } catch (e) { showMessage("存檔失敗: " + e.message); }
+                showMessage("情報已安全存儲至 GDrive: /layoff-monitor");
+            } catch (e) { showMessage("存檔異常: " + e.message); }
         }
 
         async function getOrCreateFolder() {
@@ -491,15 +502,15 @@
             await gapi.client.request({ path: '/upload/drive/v3/files', method: 'POST', params: { uploadType: 'multipart' }, headers: { 'Content-Type': `multipart/related; boundary=${boundary}` }, body });
         }
 
-        // --- 視圖切換 ---
+        // --- 視圖控制 ---
         function generateTrendSummary() {
             currentView = "trend";
             document.getElementById('view-trend-btn').classList.replace('btn-gray', 'btn-blue');
             document.getElementById('view-live-btn').classList.replace('btn-blue', 'btn-gray');
 
-            const summary = `【2025 裁員趨勢總論報告】\n----------------------------\n監測數據顯示，2025 年是科技產業「骨骼重建」的一年。\n\n1. 結構化轉型：Intel 的 2.7萬人削減象徵著從傳統硬體獲利轉向 AI Foundry 的劇痛。\n2. AI 效率替代：約 31.5% 的職缺已永久被自動化流程取代，不再補員。\n3. 資金流向：裁撤行政、中階管理職所得之資金，已全數流向 H100/B200 算力採購。\n\n[判讀結論]：市場將進入較長的穩定期，但對於低 AI 技能人力的需求將持續萎縮。`;
+            const summary = `【2025 裁員趨勢總論報告】\n----------------------------\n監測結果顯示，科技業正處於「AI 置換期」的高峰。\n\n1. 結構化轉變：Intel 2.7 萬人削減並非單純萎縮，而是將資本流向 AI 晶片製造能力。\n2. 人才重構：約 31.5% 的傳統職位被永久裁撤，企業積極招募具備 AI 工具駕駛能力的新人才。\n3. 產業判讀：目前總額 (12.2萬) 較去年大幅下降，顯示市場已渡過疫情過度招聘的修正期，轉向效率導向的長期重組。`;
             document.getElementById('ai-analysis').innerHTML = summary.split('\n').map(l => `<p>${l}</p>`).join('');
-            showMessage("已生成趨勢總論報告");
+            showMessage("已生成趨勢總結情報");
         }
 
         function showLiveReport() {
@@ -527,39 +538,44 @@
                     <tr class="border-b border-gray-800/50 hover:bg-gray-800/20 transition-colors group">
                         <td class="p-4 font-bold text-white group-hover:text-red-400">${c.name}</td>
                         <td class="p-4 text-red-300 text-center">${c.scale}</td>
-                        <td class="p-4 text-gray-500 italic">${c.trend}</td>
+                        <td class="p-4 text-gray-500 italic text-[11px]">${c.trend}</td>
                         <td class="p-4"><span class="px-2 py-0.5 rounded border text-[8px] font-black ${alertClass}">${c.alert}</span></td>
                     </tr>
                 `;
             }).join('');
         }
 
-        // --- 生命週期 ---
+        // --- 生命週期與計時 ---
         window.onload = () => {
             initChart();
             renderTable();
             
-            // 載入快取金鑰
+            const origin = window.location.origin;
+            document.getElementById('current-origin').textContent = origin.startsWith('blob:') ? "沙盒環境 (佈署後可使用 GDrive)" : origin;
+            document.getElementById('origin-tag').textContent = `STATION: ${origin.includes('github') ? 'REMOTE_COMMAND' : 'LOCAL_HUB'}`;
+
+            // 載入 localStorage
             const sid = localStorage.getItem('gdrive_client_id');
             const sky = localStorage.getItem('gdrive_api_key');
             if(sid) document.getElementById('gdrive-client-id').value = sid;
             if(sky) document.getElementById('gdrive-api-key').value = sky;
 
-            const origin = window.location.origin;
-            document.getElementById('current-origin').textContent = origin.startsWith('blob:') ? "Local/Preview" : origin;
-            document.getElementById('origin-tag').textContent = `STATION: ${origin.includes('github') ? 'EXTERNAL_HUB' : 'INTERNAL_STATION_01'}`;
-
-            // 啟動分析 (如果已有 Key)
+            // 初始分析 (如有金鑰)
             if(sky) fetchAIAnalysis();
 
-            // 時鐘與倒數
+            // 定時任務
             setInterval(() => {
                 document.getElementById('clock').textContent = formatDateTime(new Date());
                 countdown--;
                 const mins = Math.floor(countdown / 60);
                 const secs = countdown % 60;
                 document.getElementById('stat-timer').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
-                if (countdown <= 0) { countdown = 300; fetchAIAnalysis(); }
+                
+                // 只有在有金鑰時才自動更新分析，防止 403 報錯
+                if (countdown <= 0) { 
+                    countdown = 300; 
+                    if(document.getElementById('gdrive-api-key').value.trim()) fetchAIAnalysis(); 
+                }
             }, 1000);
         };
     </script>
