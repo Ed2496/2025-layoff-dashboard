@@ -225,23 +225,38 @@
       font-size: 0.8rem;
       background: #1c2128;
       border: 1px dashed var(--border);
-      padding: 10px;
+      padding: 15px;
       border-radius: 8px;
       margin-bottom: 15px;
+    }
+
+    .config-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .config-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
     }
 
     .config-input {
       background: #0d1117;
       border: 1px solid var(--border);
       color: var(--text);
-      padding: 4px 8px;
+      padding: 6px 10px;
       border-radius: 4px;
-      width: 250px;
+      width: 280px;
+      font-family: monospace;
     }
 
     .debug-info {
-      margin-top: 10px;
-      padding: 8px;
+      margin-top: 15px;
+      padding: 10px;
       background: rgba(0,0,0,0.3);
       border-radius: 4px;
       border-left: 3px solid var(--info);
@@ -273,21 +288,24 @@
 
     <!-- Google Drive 設定區域 -->
     <div class="card config-section" id="gdrive-config">
-      <strong>GDrive 備份設定:</strong>
-      <div style="margin-top:10px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-          <input type="password" id="gdrive-client-id" class="config-input" placeholder="輸入 Google Client ID">
-          <button class="btn" id="auth-btn" onclick="initGDriveAuth()">
-            <span id="auth-status">🔑 授權 GDrive</span>
-          </button>
+      <strong>GDrive 備份認證設定 (需要 Client ID 與 API Key):</strong>
+      <div class="config-input-group">
+          <div class="config-row">
+              <label style="width: 80px;">Client ID:</label>
+              <input type="password" id="gdrive-client-id" class="config-input" placeholder="Google Client ID">
+          </div>
+          <div class="config-row">
+              <label style="width: 80px;">API Key:</label>
+              <input type="password" id="gdrive-api-key" class="config-input" placeholder="Google API Key">
+              <button class="btn btn-primary" id="auth-btn" onclick="initGDriveAuth()">
+                <span id="auth-status">🔑 執行完整授權</span>
+              </button>
+          </div>
       </div>
       
       <div id="origin-debug" class="debug-info">
-          偵測目前 Origin (請複製到 Google Console):<br>
+          偵測目前 Origin (請複製到 Google Console 的「已授權來源」):<br>
           <span id="current-origin" style="color: var(--info);">讀取中...</span>
-      </div>
-
-      <div style="margin-top: 10px; font-size: 0.75rem; color: #8b949e;">
-        ※ 步驟：在 Google Cloud Console 的 OAuth 用戶端設定中，將上方網址加入「已授權的 JavaScript 來源」。
       </div>
     </div>
 
@@ -339,7 +357,7 @@
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <h2 style="font-size: 1.1rem; margin: 0; border-left: 3px solid var(--success); padding-left: 10px;">AI 結構調整深度報告 (24H)</h2>
         <div style="display: flex; gap: 5px;">
-            <button class="btn btn-primary" onclick="generateTrendSummary()">📊 趨勢總論</button>
+            <button class="btn" onclick="generateTrendSummary()">📊 趨勢總論</button>
             <button class="btn btn-warning" id="save-btn" onclick="saveReportToGDrive()">💾 備份至 GDrive</button>
         </div>
       </div>
@@ -357,7 +375,14 @@
 // 公司清單
 const companies = ["Google","Microsoft","Meta","Amazon","Apple","Nvidia","Broadcom","Tesla"];
 let countdown = 300; 
-let historyReports = JSON.parse(localStorage.getItem('layoff_history') || '[]');
+
+// 從 LocalStorage 載入歷史與金鑰
+let historyReports = [];
+try {
+    historyReports = JSON.parse(localStorage.getItem('layoff_history') || '[]');
+} catch(e) {
+    historyReports = [];
+}
 
 // --- Google Drive 整合變數 ---
 let gapiInited = false;
@@ -428,10 +453,17 @@ async function refreshLayoffData() {
       report: `[戰情分析] ${formatDateTime(now)}\n------------------------------------------------\n1. 科技業進入「AI 替代週期」，企業並非僅縮減規模，而是將人才結構轉向 AGI 領域。\n2. Tesla 裁員數字因應全球策略轉向再次大幅上修，旨在將資源投入 Optimus 機器人研發。\n3. Nvidia 目前為全球技術競爭力最強之避風港，維持零裁員並擴大全球招募。`
     };
 
-    // 紀錄到歷史
-    historyReports.push(mockData);
-    if(historyReports.length > 30) historyReports.shift();
-    localStorage.setItem('layoff_history', JSON.stringify(historyReports));
+    // 儲存總人數紀錄
+    const historyItem = { timestamp: mockData.timestamp, total: mockData.total };
+    historyReports.push(historyItem);
+    if(historyReports.length > 50) historyReports.shift();
+    
+    try {
+        localStorage.setItem('layoff_history', JSON.stringify(historyReports));
+    } catch(e) {
+        historyReports = historyReports.slice(-10);
+        localStorage.setItem('layoff_history', JSON.stringify(historyReports));
+    }
 
     document.getElementById("total").textContent = mockData.total.toLocaleString();
     document.getElementById("today").textContent = "+" + mockData.today.toLocaleString();
@@ -459,24 +491,41 @@ async function refreshLayoffData() {
 // --- Google Drive 核心功能 ---
 
 async function initGDriveAuth() {
-    const clientId = document.getElementById('gdrive-client-id').value;
-    if(!clientId) {
-        showMessage("請先輸入 Google Client ID");
+    if (window.location.protocol === 'file:') {
+        showMessage("錯誤：Google 授權不支援 file://。請使用網頁伺服器環境。");
         return;
     }
+
+    const clientId = document.getElementById('gdrive-client-id').value;
+    const apiKey = document.getElementById('gdrive-api-key').value;
+
+    if(!clientId || !apiKey) {
+        showMessage("請同時輸入 Client ID 與 API Key");
+        return;
+    }
+
+    // 儲存設定到 localStorage
+    localStorage.setItem('gdrive_client_id', clientId);
+    localStorage.setItem('gdrive_api_key', apiKey);
 
     const authBtn = document.getElementById('auth-btn');
     authBtn.disabled = true;
 
     try {
+        // 初始化 GAPI 客戶端
         if (!gapiInited) {
             await new Promise((resolve, reject) => {
                 gapi.load('client', { callback: resolve, onerror: reject });
             });
-            await gapi.client.init({ discoveryDocs: [DISCOVERY_DOC] });
+            // 同時使用 apiKey 與 clientId 初始化
+            await gapi.client.init({ 
+                apiKey: apiKey,
+                discoveryDocs: [DISCOVERY_DOC] 
+            });
             gapiInited = true;
         }
 
+        // 初始化 OAuth2 Token Client
         tokenClient = google.accounts.oauth2.initTokenClient({
             client_id: clientId,
             scope: SCOPES,
@@ -489,16 +538,15 @@ async function initGDriveAuth() {
                 document.getElementById('auth-status').textContent = "✅ 已連結 GDrive";
                 gsisInited = true;
                 authBtn.disabled = false;
-                showMessage("GDrive 授權成功！");
+                showMessage("GDrive 授權與金鑰驗證成功！");
             },
         });
 
-        // 觸發授權
         tokenClient.requestAccessToken({prompt: 'consent'});
 
     } catch (e) {
         console.error(e);
-        showMessage("初始化失敗，請檢查網路或 Client ID");
+        showMessage("認證失敗，請檢查 Client ID 與 API Key 是否正確");
         authBtn.disabled = false;
     }
 }
@@ -575,7 +623,7 @@ async function saveReportToGDrive() {
     const mdContent = `# 裁員戰情室每日報告\n\n生成時間: ${formatDateTime(new Date())}\n\n\`\`\`text\n${reportText}\n\`\`\``;
     const success = await uploadFileToGDrive(filename, mdContent);
     if(success) showMessage(`報告已存入 GDrive: ${filename}`);
-    else showMessage("備份失敗，請確認授權或網域設定");
+    else showMessage("備份失敗，請確認授權與金鑰權限");
     saveBtn.disabled = false;
 }
 
@@ -604,15 +652,23 @@ async function generateTrendSummary() {
     }
 }
 
-// --- 輔助：偵測當前 Origin ---
-function detectOrigin() {
+// --- 輔助：偵測與載入 ---
+function initConfigDisplay() {
     const origin = window.location.origin;
     const display = document.getElementById('current-origin');
     if (origin.startsWith('blob:')) {
-        display.textContent = "偵測到 Blob 沙盒環境。請將佈署後的網址（如 GitHub 網址）加入 Google Console。";
+        display.textContent = "沙盒環境。正式部署後請將網址加入 Google Console。";
+    } else if (window.location.protocol === 'file:') {
+        display.textContent = "本地檔案環境。請改用 Live Server 執行。";
     } else {
         display.textContent = origin;
     }
+
+    // 載入舊有的 Client ID 與 API Key
+    const sid = localStorage.getItem('gdrive_client_id');
+    const sky = localStorage.getItem('gdrive_api_key');
+    if(sid) document.getElementById('gdrive-client-id').value = sid;
+    if(sky) document.getElementById('gdrive-api-key').value = sky;
 }
 
 // --- 初始化啟動 ---
@@ -622,7 +678,7 @@ setInterval(updateCountdown, 1000);
 window.onload = function() {
   updateClock();
   refreshLayoffData();
-  detectOrigin();
+  initConfigDisplay();
 }
 </script>
 </body>
