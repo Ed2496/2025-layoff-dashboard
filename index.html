@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Big-8 裁員戰情室 2026 | DOGE & Tech Monitor</title>
+    <!-- 核心外部庫 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -18,7 +19,7 @@
             --accent-red: #ff3e3e;
             --accent-green: #00ff9d;
             --accent-blue: #00d4ff;
-            --accent-purple: #d000ff; /* New for DOGE */
+            --accent-purple: #d000ff;
             --border-color: #30363d;
         }
 
@@ -126,7 +127,6 @@
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
         
-        /* New badge styles for DOGE */
         .badge-doge {
             background: rgba(208, 0, 255, 0.1);
             color: #e066ff;
@@ -136,6 +136,7 @@
 </head>
 <body class="p-4 md:p-8">
     <div class="max-w-7xl mx-auto">
+        <!-- Header -->
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-red-900/50 pb-6">
             <div>
                 <h1 class="text-3xl font-bold tracking-tighter text-red-500 flex items-center gap-3">
@@ -150,6 +151,7 @@
             </div>
         </header>
 
+        <!-- 認證設定中心 -->
         <div class="cyber-card p-6 rounded-xl mb-8 border-blue-900/40 bg-blue-950/5">
             <h3 class="text-xs font-bold text-blue-400 mb-4 flex items-center gap-2 uppercase tracking-widest">
                 <i class="fa-solid fa-gears"></i> 認證配置 (CONFIGURATION)
@@ -178,6 +180,7 @@
             </div>
         </div>
 
+        <!-- Stats Grid (Updated for Jan 2026) -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <div class="cyber-card p-4 rounded-lg">
                 <div class="text-gray-500 text-[10px] font-bold mb-1 uppercase tracking-wider">2026 Q1 累計 (含DOGE)</div>
@@ -202,7 +205,9 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Left: Chart & Table -->
             <div class="lg:col-span-8 space-y-8">
+                <!-- Trend Chart -->
                 <div class="cyber-card rounded-xl p-6">
                     <h2 class="text-sm font-bold mb-6 flex items-center gap-2 uppercase tracking-widest text-blue-400">
                         <i class="fa-solid fa-chart-line"></i> 2025-2026 跨年度裁員趨勢 (DOGE Impact)
@@ -212,6 +217,7 @@
                     </div>
                 </div>
 
+                <!-- Table Section -->
                 <div class="cyber-card rounded-xl">
                     <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-900/30">
                         <h2 class="text-sm font-bold flex items-center gap-2 uppercase">
@@ -230,12 +236,14 @@
                                 </tr>
                             </thead>
                             <tbody id="company-table-body" class="mono text-xs">
-                                </tbody>
+                                <!-- JS Injection -->
+                            </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
+            <!-- Right: AI Analysis -->
             <div class="lg:col-span-4 space-y-6">
                 <div class="cyber-card rounded-xl p-6 bg-blue-950/20 border-blue-900/50 relative min-h-[550px] flex flex-col">
                     <div class="scanline"></div>
@@ -296,8 +304,9 @@
     </div>
 
     <script>
-        // --- 2026 核心數據 (Updated based on Perplexity & Jan Week 3) ---
-        const companiesData = [
+    (function() {
+        // --- 核心變數 (使用 var 或掛載 window 確保相容性) ---
+        var companiesData = [
             { id: "DOGE", name: "DOGE (Federal Govt)", scale: "200,000+", trend: "聯邦機構/承包商大規模裁減 (USDA/FEMA)", alert: "MAXIMUM" },
             { id: "Amazon", name: "Amazon", scale: "30,000", trend: "管理層去官僚化 (WARN通知至5月)", alert: "HIGH" },
             { id: "Google", name: "Google", scale: "Thousands", trend: "核心工程與語音助理團隊重組 (AI Pivot)", alert: "MED" },
@@ -307,47 +316,197 @@
             { id: "Xerox", name: "Xerox", scale: "3,000", trend: "商業模式轉型", alert: "MED" }
         ];
 
-        let countdown = 300;
-        let chartInstance = null;
-        let lastLiveReport = "";
-        let currentView = "live"; 
+        var countdown = 300;
+        var chartInstance = null;
+        var lastLiveReport = "";
+        var currentView = "live";
+        var gapiInited = false;
+        var gsisInited = false;
+        var tokenClient;
+        var SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
-        let gapiInited = false;
-        let gsisInited = false;
-        let tokenClient;
-        let gdriveFolderId = null;
-        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-
-        // --- UI 工具 ---
-        function showMessage(msg, duration = 4000) {
-            const box = document.getElementById('msg-box');
-            box.textContent = `[SYSTEM] > ${msg}`;
+        // --- 全域工具函數 (確保 onclick 可用) ---
+        window.showMessage = function(msg, duration) {
+            if (!duration) duration = 4000;
+            var box = document.getElementById('msg-box');
+            box.textContent = "[SYSTEM] > " + msg;
             box.style.display = 'block';
-            setTimeout(() => { box.style.display = 'none'; }, duration);
-        }
+            setTimeout(function() { box.style.display = 'none'; }, duration);
+        };
 
-        function formatDateTime(date, full = false) {
-            const options = full 
+        window.formatDateTime = function(date, full) {
+            var options = full 
                 ? { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }
                 : { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
             return date.toLocaleString('zh-TW', options).replace(/\//g, '-');
-        }
+        };
 
-        // --- 圖表初始化 (Updated for 2026 Jan Spike) ---
-        function initChart() {
-            const ctx = document.getElementById('trendChart').getContext('2d');
+        // --- 全域核心邏輯 ---
+        window.saveKeysAndAuth = function() {
+            var cid = document.getElementById('gdrive-client-id').value.trim();
+            var aky = document.getElementById('gdrive-api-key').value.trim();
+            if(!cid || !aky) return window.showMessage("配置不完整");
+
+            localStorage.setItem('gdrive_client_id', cid);
+            localStorage.setItem('gdrive_api_key', aky);
+            
+            window.showMessage("配置已儲存，正在執行 GDrive 授權...");
+            window.initGDriveAuth();
+            window.fetchAIAnalysis(); 
+        };
+
+        window.clearKeys = function() {
+            localStorage.removeItem('gdrive_client_id');
+            localStorage.removeItem('gdrive_api_key');
+            document.getElementById('gdrive-client-id').value = "";
+            document.getElementById('gdrive-api-key').value = "";
+            window.showMessage("認證紀錄已清除");
+        };
+
+        window.generateTrendSummary = function() {
+            currentView = "trend";
+            document.getElementById('view-trend-btn').classList.replace('btn-gray', 'btn-blue');
+            document.getElementById('view-live-btn').classList.replace('btn-blue', 'btn-gray');
+            
+            var currentTime = window.formatDateTime(new Date(), true);
+            var summary = "【2026 Jan 戰情總結】\n報告生成時間：" + currentTime + "\n----------------------------\n1. DOGE 效應：政府效率部的介入創造了前所未有的「非市場性裁員」(20萬+)，這在歷史數據中是極端異常值。\n2. 科技業第二曲線：Amazon 與 Google 的裁員不再是為了「生存」，而是為了「AI 組織重構」。\n3. 風險預警：公部門與私部門同時釋出大量人力，短期就業市場將極度擁擠。\n\n[系統提示]：數據每 5 分鐘自動刷新。";
+            
+            var formatted = summary.split('\n').map(function(l) { return "<p>" + l + "</p>"; }).join('');
+            document.getElementById('ai-analysis').innerHTML = formatted;
+            window.showMessage("已生成趨勢總結情報");
+        };
+
+        window.showLiveReport = function() {
+            currentView = "live";
+            document.getElementById('view-live-btn').classList.replace('btn-gray', 'btn-blue');
+            document.getElementById('view-trend-btn').classList.replace('btn-blue', 'btn-gray');
+            if(lastLiveReport) {
+                var formatted = lastLiveReport.split('\n').map(function(l) { return "<p class='mb-2'>" + l + "</p>"; }).join('');
+                document.getElementById('ai-analysis').innerHTML = formatted;
+            } else {
+                window.fetchAIAnalysis();
+            }
+        };
+
+        window.saveReportToGDrive = async function() {
+            if(!gsisInited) return window.showMessage("請先點擊「儲存並授權」");
+            var content = document.getElementById('ai-analysis').innerText;
+            var filename = "layoff-DOGE-Update-" + new Date().toISOString().split('T')[0] + ".md";
+            
+            window.showMessage("備份至雲端中...");
+            try {
+                var fid = await window.getOrCreateFolder();
+                await window.uploadFile(filename, content, fid);
+                window.showMessage("備份完成: /layoff-monitor");
+            } catch (e) { window.showMessage("同步異常: " + e.message); }
+        };
+
+        window.initGDriveAuth = async function() {
+            var cid = document.getElementById('gdrive-client-id').value.trim();
+            var aky = document.getElementById('gdrive-api-key').value.trim();
+            if(!cid) return;
+
+            try {
+                if (!gapiInited) {
+                    await new Promise(function(res) { gapi.load('client', res); });
+                    await gapi.client.init({ 
+                        apiKey: aky, 
+                        discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] 
+                    });
+                    gapiInited = true;
+                }
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: cid, 
+                    scope: SCOPES,
+                    callback: function(resp) {
+                        if (resp.error) {
+                            console.error(resp);
+                            return window.showMessage("授權遭拒");
+                        }
+                        gsisInited = true;
+                        document.getElementById('auth-status').textContent = "已連結";
+                        document.getElementById('auth-btn').classList.replace('btn-blue', 'btn-green');
+                        window.showMessage("Google Drive 連結成功");
+                    }
+                });
+                tokenClient.requestAccessToken({prompt: 'consent'});
+            } catch (e) { 
+                console.error(e);
+                window.showMessage("授權初始化失敗");
+            }
+        };
+
+        window.fetchAIAnalysis = async function() {
+            var apiKey = document.getElementById('gdrive-api-key').value.trim();
+            var analysisEl = document.getElementById('ai-analysis');
+            if(!apiKey) {
+                analysisEl.innerHTML = '<p class="text-orange-400">[WAITING] 請先於設定區輸入 API Key 以同步 Jan 2026 最新情報。</p>';
+                return;
+            }
+
+            var loading = document.getElementById('loading-screen');
+            loading.classList.remove('hidden');
+
+            var query = "你是一位資深戰情分析官。請針對 2026 年 1 月中旬 (Jan Week 3) 的裁員情報進行深度解析：\n\n核心數據輸入：\n1. DOGE (政府效率部)：對聯邦機構 (USDA, FEMA) 及承包商造成約 200,000+ 人力縮減或停薪。\n2. Amazon：確認新一波 WARN 通知，針對中階管理層裁減約 30,000 人 (延續至 5 月)。\n3. Google/Tech：持續進行 \"AI Pivot\" (以 AI 取代團隊)。\n\n請生成繁體中文簡報，包含：\n【DOGE 衝擊評估】：政府部門裁員對市場的震盪。\n【科技業動態】：Amazon 與 Google 的去官僚化策略。\n【趨勢結論】：2026 Q1 是否會超越 2023 年紀錄？\n\n風格：軍事化、冷靜、數據導向。";
+
+            try {
+                // 使用 fetch 呼叫 Gemini
+                var response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=' + apiKey, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: query }] }] })
+                });
+
+                var data = await response.json();
+                if (data.error) throw new Error(data.error.message);
+                
+                var text = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] ? data.candidates[0].content.parts[0].text : "通訊中斷。";
+                lastLiveReport = text;
+                
+                if (currentView === "live") {
+                    var formatted = text.split('\n').map(function(l) { return "<p class='mb-2'>" + l + "</p>"; }).join('');
+                    analysisEl.innerHTML = formatted;
+                }
+                
+                document.getElementById('last-sync-time').textContent = window.formatDateTime(new Date());
+
+            } catch (error) {
+                console.error(error);
+                analysisEl.innerHTML = '<div class="p-3 border border-red-900 bg-red-950/20 text-red-400 rounded text-xs mono"><p class="font-bold underline">[ACCESS_DENIED]</p><p>' + error.message + '</p></div>';
+            } finally {
+                loading.classList.add('hidden');
+            }
+        };
+
+        // GDrive helpers
+        window.getOrCreateFolder = async function() {
+            var res = await gapi.client.drive.files.list({ q: "name = 'layoff-monitor' and mimeType = 'application/vnd.google-apps.folder' and trashed = false" });
+            if (res.result.files.length > 0) return res.result.files[0].id;
+            var folder = await gapi.client.drive.files.create({ resource: { name: 'layoff-monitor', mimeType: 'application/vnd.google-apps.folder' }, fields: 'id' });
+            return folder.result.id;
+        };
+
+        window.uploadFile = async function(name, content, folderId) {
+            var metadata = { name: name, parents: [folderId], mimeType: 'text/markdown' };
+            var boundary = '-------3141592';
+            var body = '--' + boundary + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) + '\r\n--' + boundary + '\r\nContent-Type: text/markdown\r\n\r\n' + content + '\r\n--' + boundary + '--';
+            await gapi.client.request({ path: '/upload/drive/v3/files', method: 'POST', params: { uploadType: 'multipart' }, headers: { 'Content-Type': 'multipart/related; boundary=' + boundary }, body: body });
+        };
+
+        // Render Functions
+        window.initChart = function() {
+            var ctx = document.getElementById('trendChart').getContext('2d');
             chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    // 顯示 2025 Q4 到 2026 Q1 的趨勢
                     labels: ['2025-Oct', '2025-Nov', '2025-Dec', '2026-Jan (Tech)', '2026-Jan (DOGE)'],
                     datasets: [{
                         label: '裁員量級 (人)',
-                        data: [9000, 8000, 12000, 42000, 295000], // Jan Spike logic
-                        borderColor: '#d000ff', // Purple for 2026
-                        backgroundColor: (context) => {
-                            const ctx = context.chart.ctx;
-                            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+                        data: [9000, 8000, 12000, 42000, 295000], 
+                        borderColor: '#d000ff',
+                        backgroundColor: function(context) {
+                            var ctx = context.chart.ctx;
+                            var gradient = ctx.createLinearGradient(0, 0, 0, 300);
                             gradient.addColorStop(0, 'rgba(208, 0, 255, 0.5)');
                             gradient.addColorStop(1, 'rgba(208, 0, 255, 0.0)');
                             return gradient;
@@ -365,84 +524,71 @@
                         y: { 
                             grid: { color: '#1a1f26' }, 
                             ticks: { color: '#888', font: { size: 9 } },
-                            type: 'linear' // Keeping linear to show the massive jump
+                            type: 'linear'
                         },
                         x: { grid: { display: false }, ticks: { color: '#888', font: { size: 9 } } }
                     }
                 }
             });
-        }
+        };
 
-        // --- 核心 AI 請求 (Updated Prompt for DOGE/Amazon) ---
-        async function fetchAIAnalysis() {
-            const apiKey = document.getElementById('gdrive-api-key').value.trim();
-            const analysisEl = document.getElementById('ai-analysis');
-            if(!apiKey) {
-                analysisEl.innerHTML = `<p class="text-orange-400">[WAITING] 請先於設定區輸入 API Key 以同步 Jan 2026 最新情報。</p>`;
-                return;
-            }
-
-            const loading = document.getElementById('loading-screen');
-            loading.classList.remove('hidden');
-
-            const query = `
-                你是一位資深戰情分析官。請針對 2026 年 1 月中旬 (Jan Week 3) 的裁員情報進行深度解析：
-                
-                核心數據輸入：
-                1. DOGE (政府效率部)：對聯邦機構 (USDA, FEMA) 及承包商造成約 200,000+ 人力縮減或停薪。
-                2. Amazon：確認新一波 WARN 通知，針對中階管理層裁減約 30,000 人 (延續至 5 月)。
-                3. Google/Tech：持續進行 "AI Pivot" (以 AI 取代團隊)。
-
-                請生成繁體中文簡報，包含：
-                【DOGE 衝擊評估】：政府部門裁員對市場的震盪。
-                【科技業動態】：Amazon 與 Google 的去官僚化策略。
-                【趨勢結論】：2026 Q1 是否會超越 2023 年紀錄？
-                
-                風格：軍事化、冷靜、數據導向。
-            `;
-
-            try {
-                // Using gemini-2.0-flash-exp or 1.5-flash as available
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: query }] }] })
-                });
-
-                // Fallback if 2.0 not available
-                if (response.status !== 200) {
-                     // retry logic or error handling handled in catch
+        window.renderTable = function() {
+            var tbody = document.getElementById('company-table-body');
+            tbody.innerHTML = companiesData.map(function(c) {
+                var alertClass = "";
+                var rowClass = "";
+                switch(c.alert) {
+                    case "MAXIMUM": alertClass = "badge-doge font-black animate-pulse"; rowClass="bg-purple-900/10"; break;
+                    case "CRITICAL": alertClass = "text-red-500 border-red-500/50 bg-red-500/10"; break;
+                    case "HIGH": alertClass = "text-orange-500 border-orange-500/50 bg-orange-500/10"; break;
+                    case "MED": alertClass = "text-yellow-500 border-yellow-500/50 bg-yellow-500/10"; break;
+                    case "STABLE": alertClass = "text-green-500 border-green-500/50 bg-green-500/10"; break;
                 }
-
-                const data = await response.json();
-                if (data.error) throw new Error(data.error.message);
-                
-                const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "通訊中斷。";
-                lastLiveReport = text;
-                
-                if (currentView === "live") {
-                    analysisEl.innerHTML = text.split('\n').map(l => `<p class="mb-2">${l}</p>`).join('');
-                }
-                
-                document.getElementById('last-sync-time').textContent = formatDateTime(new Date());
-                renderTable();
-
-            } catch (error) {
-                console.error(error);
-                analysisEl.innerHTML = `
-                    <div class="p-3 border border-red-900 bg-red-950/20 text-red-400 rounded text-xs mono">
-                        <p class="font-bold underline">[ACCESS_DENIED]</p>
-                        <p>${error.message}</p>
-                        <p class="mt-2 text-gray-400">請確認 API Key 是否支援 Gemini 2.0 Flash 或 1.5 Pro。</p>
-                    </div>
+                return `
+                    <tr class="border-b border-gray-800/50 hover:bg-gray-800/20 transition-colors group ${rowClass}">
+                        <td class="p-4 font-bold text-white group-hover:text-red-400">${c.name}</td>
+                        <td class="p-4 text-red-300 text-center mono">${c.scale}</td>
+                        <td class="p-4 text-gray-400 italic text-[11px]">${c.trend}</td>
+                        <td class="p-4"><span class="px-2 py-0.5 rounded border text-[9px] font-black ${alertClass}">${c.alert}</span></td>
+                    </tr>
                 `;
-            } finally {
-                loading.classList.add('hidden');
-            }
-        }
+            }).join('');
+        };
 
-        // --- 授權邏輯 (Standard Google Auth) ---
-        function saveKeysAndAuth() {
-            const cid = document.getElementById('gdrive-client-id').value.trim();
-            const aky = document.getElementById('gdrive-api-key').value.trim();
-            if(!cid || !aky) return show
+        // Init
+        window.onload = function() {
+            try {
+                window.initChart();
+                window.renderTable();
+                
+                var origin = window.location.origin;
+                document.getElementById('current-origin').textContent = origin.startsWith('blob:') ? "沙盒環境 (Sandbox)" : origin;
+                document.getElementById('origin-tag').textContent = "STATION: " + (origin.includes('github') ? 'REMOTE_OPS' : 'LOCAL_NODE');
+
+                var sid = localStorage.getItem('gdrive_client_id');
+                var sky = localStorage.getItem('gdrive_api_key');
+                if(sid) document.getElementById('gdrive-client-id').value = sid;
+                if(sky) document.getElementById('gdrive-api-key').value = sky;
+
+                setInterval(function() {
+                    document.getElementById('clock').textContent = window.formatDateTime(new Date());
+                    countdown--;
+                    var mins = Math.floor(countdown / 60);
+                    var secs = countdown % 60;
+                    document.getElementById('stat-timer').textContent = mins + ":" + secs.toString().padStart(2, '0');
+                    if (countdown <= 0) { 
+                        countdown = 300; 
+                        if(document.getElementById('gdrive-api-key').value) window.fetchAIAnalysis(); 
+                    }
+                }, 1000);
+                
+                console.log("System Online: Listeners attached.");
+            } catch(e) {
+                console.error("Critical Init Error:", e);
+                alert("系統初始化失敗，請檢查控制台。");
+            }
+        };
+    })();
+    </script>
+</body>
+</html>
