@@ -210,7 +210,7 @@
                 <!-- Trend Chart -->
                 <div class="cyber-card rounded-xl p-6">
                     <h2 class="text-sm font-bold mb-6 flex items-center gap-2 uppercase tracking-widest text-blue-400">
-                        <i class="fa-solid fa-chart-line"></i> 2025-2026 跨年度裁員趨勢 (DOGE Impact)
+                        <i class="fa-solid fa-chart-line"></i> 2025-2026 跨年度裁員趨勢 (雙軸監控版)
                     </h2>
                     <div style="height: 250px; width: 100%;">
                         <canvas id="trendChart"></canvas>
@@ -451,11 +451,16 @@
 
             try {
                 // 使用 fetch 呼叫 Gemini
-                var response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=' + apiKey, {
+                // Fix: 降級至 gemini-1.5-flash 以解決 429 配額錯誤
+                var response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + apiKey, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: query }] }] })
                 });
+
+                if (response.status === 429) {
+                    throw new Error("API 配額已滿 (Quota Exceeded)。請稍後再試，或更換 API Key。");
+                }
 
                 var data = await response.json();
                 if (data.error) throw new Error(data.error.message);
@@ -472,7 +477,7 @@
 
             } catch (error) {
                 console.error(error);
-                analysisEl.innerHTML = '<div class="p-3 border border-red-900 bg-red-950/20 text-red-400 rounded text-xs mono"><p class="font-bold underline">[ACCESS_DENIED]</p><p>' + error.message + '</p></div>';
+                analysisEl.innerHTML = '<div class="p-3 border border-red-900 bg-red-950/20 text-red-400 rounded text-xs mono"><p class="font-bold underline">[ERROR]</p><p>' + error.message + '</p></div>';
             } finally {
                 loading.classList.add('hidden');
             }
@@ -499,34 +504,59 @@
             chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['2025-Oct', '2025-Nov', '2025-Dec', '2026-Jan (Tech)', '2026-Jan (DOGE)'],
-                    datasets: [{
-                        label: '裁員量級 (人)',
-                        data: [9000, 8000, 12000, 42000, 295000], 
-                        borderColor: '#d000ff',
-                        backgroundColor: function(context) {
-                            var ctx = context.chart.ctx;
-                            var gradient = ctx.createLinearGradient(0, 0, 0, 300);
-                            gradient.addColorStop(0, 'rgba(208, 0, 255, 0.5)');
-                            gradient.addColorStop(1, 'rgba(208, 0, 255, 0.0)');
-                            return gradient;
+                    labels: ['2025-Oct', '2025-Nov', '2025-Dec', '2026-Jan'], // Unified timeline
+                    datasets: [
+                        {
+                            label: '科技/私營部門 (Tech)',
+                            data: [9000, 8000, 12000, 42000], // The "normal" trend
+                            borderColor: '#00d4ff', // Cyan
+                            backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            yAxisID: 'y' // Left Axis
                         },
-                        borderWidth: 2,
-                        tension: 0.3,
-                        fill: true,
-                        pointBackgroundColor: '#fff'
-                    }]
+                        {
+                            label: 'DOGE 影響 (Govt Impact)',
+                            data: [0, 0, 0, 295000], // The spike
+                            borderColor: '#d000ff', // Purple
+                            backgroundColor: 'rgba(208, 0, 255, 0.1)',
+                            borderWidth: 2,
+                            borderDash: [5, 5], // Dotted line to distinguish nature
+                            tension: 0.1,
+                            yAxisID: 'y1' // Right Axis
+                        }
+                    ]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    plugins: {
+                        legend: { display: true, labels: { color: '#888' } }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
                     scales: {
-                        y: { 
-                            grid: { color: '#1a1f26' }, 
-                            ticks: { color: '#888', font: { size: 9 } },
-                            type: 'linear'
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            grid: { color: '#1a1f26' },
+                            ticks: { color: '#00d4ff', font: { size: 9 } },
+                            title: { display: true, text: 'Tech (人)', color: '#00d4ff', font: { size: 10 } }
                         },
-                        x: { grid: { display: false }, ticks: { color: '#888', font: { size: 9 } } }
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: { drawOnChartArea: false }, // Avoid grid clutter
+                            ticks: { color: '#d000ff', font: { size: 9 } },
+                            title: { display: true, text: 'DOGE (人)', color: '#d000ff', font: { size: 10 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#888', font: { size: 9 } }
+                        }
                     }
                 }
             });
@@ -592,3 +622,4 @@
     </script>
 </body>
 </html>
+
