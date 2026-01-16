@@ -3,6 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- FMEA Action 1: 新增 SEO 與社群分享 Meta Tags -->
+    <meta name="description" content="2026年全球裁員戰情室：即時監控 DOGE (政府效率部) 與科技巨頭 (Amazon, Google, Meta) 的裁員動態。深度分析 AI 轉型與公部門縮編的雙重就業衝擊。">
+    <meta name="keywords" content="2026裁員, 裁員名單, DOGE, 政府效率部, Amazon裁員, Google裁員, Meta, 科技業失業, AI轉型, 台灣科技業">
+    <meta name="author" content="Tech Layoff Intelligence Command">
+    
+    <!-- Open Graph / Facebook / Line 預覽 -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://layoff-radar-2026.github.io/">
+    <meta property="og:title" content="Big-8 裁員戰情室 2026 | DOGE & Tech Monitor">
+    <meta property="og:description" content="獨家雙軸監控：科技業 AI 轉型 vs DOGE 政府效率部裁員潮。點擊查看 2026 年最新受災範圍預測。">
+    <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/2554/2554037.png"> <!-- 示意圖 -->
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Big-8 裁員戰情室 2026 | 監控中">
+    <meta property="twitter:description" content="DOGE 效率部衝擊與 Amazon 3萬人裁員預告分析。">
+
     <title>Big-8 裁員戰情室 2026 | DOGE & Tech Monitor</title>
     <!-- 核心外部庫 -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -309,6 +327,7 @@
         var companiesData = [
             { id: "DOGE", name: "DOGE (Federal Govt)", scale: "200,000+", trend: "聯邦機構/承包商大規模裁減 (USDA/FEMA)", alert: "MAXIMUM" },
             { id: "Amazon", name: "Amazon", scale: "30,000", trend: "管理層去官僚化 (WARN通知至5月)", alert: "HIGH" },
+            { id: "Meta", name: "Meta", scale: "Flat", trend: "組織扁平化持續 / 績效末位淘汰 (Year of Efficiency 2.0)", alert: "MED" }, // FMEA Action 2: Added Meta Company
             { id: "Google", name: "Google", scale: "Thousands", trend: "核心工程與語音助理團隊重組 (AI Pivot)", alert: "MED" },
             { id: "Microsoft", name: "Microsoft", scale: "11,000 (Est)", trend: "Q1 預期裁員 (Gaming/AI Costs)", alert: "HIGH" },
             { id: "Intel", name: "Intel Corp", scale: "2,000 (Rem)", trend: "2025 餘波 / 財務重組持續", alert: "MED" },
@@ -622,4 +641,3 @@
     </script>
 </body>
 </html>
-
