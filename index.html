@@ -310,7 +310,7 @@
         </div>
 
         <footer class="mt-12 text-center border-t border-gray-900 pt-8 pb-12">
-            <p class="text-[10px] text-gray-600 tracking-widest uppercase">© 2026 Tech Layoff Intelligence Command Center // POWERED BY GEMINI-FLASH 2.0</p>
+            <p class="text-[10px] text-gray-600 tracking-widest uppercase">© 2026 Tech Layoff Intelligence Command Center // POWERED BY GEMINI-FLASH 2.5</p>
         </footer>
     </div>
 
@@ -470,8 +470,8 @@
 
             try {
                 // 使用 fetch 呼叫 Gemini
-                // Fix: 降級至 gemini-1.5-flash 以解決 429 配額錯誤
-                var response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + apiKey, {
+                // Fix: FMEA Action 5 - Hard Lock to User Requested Model gemini-2.5-flash
+                var response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + apiKey, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: query }] }] })
@@ -479,6 +479,10 @@
 
                 if (response.status === 429) {
                     throw new Error("API 配額已滿 (Quota Exceeded)。請稍後再試，或更換 API Key。");
+                }
+                
+                if (response.status === 404) {
+                    throw new Error("模型未找到 (404)。請確認您的 API Key 是否已開通 gemini-2.5-flash 權限。");
                 }
 
                 var data = await response.json();
